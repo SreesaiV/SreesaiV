@@ -1,0 +1,138 @@
+Android manifest:
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" >
+    <uses-permission android:name="android.permission.INTERNET"
+    <application
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Gdgapp"
+        tools:targetApi="31" >
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Gdgapp" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
+
+
+-----------------------------------------------------------------------------------------------------------------
+
+MAin Activity :
+
+package com.example.archerygame
+
+import android.os.Bundle
+import android.os.Handler
+import android.view.View
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import kotlin.random.Random
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var target: ImageView
+    private lateinit var arrow: ImageView
+    private lateinit var scoreText: TextView
+
+    private var score = 0
+    private val handler = Handler()
+    private var targetDirection = 1 // 1 for right, -1 for left
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        target = findViewById(R.id.target)
+        arrow = findViewById(R.id.arrow)
+        scoreText = findViewById(R.id.score)
+
+        moveTarget()
+        setupArrowShoot()
+    }
+
+    private fun moveTarget() {
+        val runnable = object : Runnable {
+            override fun run() {
+                val x = target.x + 10 * targetDirection
+                if (x > width - target.width || x < 0) {
+                    targetDirection *= -1
+                }
+                target.x += 10 * targetDirection
+                handler.postDelayed(this, 30)
+            }
+        }
+        handler.post(runnable)
+    }
+
+    private fun setupArrowShoot() {
+        arrow.setOnClickListener {
+            val targetCenterX = target.x + target.width / 2
+            val arrowCenterX = arrow.x + arrow.width / 2
+            val hitMargin = target.width / 2
+
+            if (Math.abs(targetCenterX - arrowCenterX) <= hitMargin) {
+                score += 10
+                scoreText.text = "Score: $score"
+            }
+        }
+    }
+}
+
+-----------------------------------------------------------------------------------------------------------
+
+ic launcher background.xml :
+
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#87CEEB">
+
+    <!-- Target -->
+    <ImageView
+        android:id="@+id/target"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/target"
+        android:contentDescription="Archery target" />
+
+    <!-- Arrow -->
+    <ImageView
+        android:id="@+id/arrow"
+        android:layout_width="50dp"
+        android:layout_height="100dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/arrow"
+        android:contentDescription="Arrow" />
+
+    <!-- Score -->
+    <TextView
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_centerHorizontal="true"
+        android:text="Score: 0"
+        android:textColor="#000"
+        android:textSize="24sp"
+        android:textStyle="bold" />
+</RelativeLayout>
